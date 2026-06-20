@@ -16,9 +16,8 @@ Main features:
 - Checkpoint saving/loading.
 - Progress logging.
 - Optional CSV output.
-- iPhone-friendly defaults.
-- A generated "quirk registry" section with thousands of small quirk notes/rules
-  so the file is over 5000 lines as requested.
+
+(NOTE: I did most of my testing of this acript on an iPhone (16e) due to lack of a better device while travling)
 
 Important:
 The perfect cuboid problem is unsolved. This script does not magically solve it.
@@ -5792,8 +5791,6 @@ QUIRK_REGISTRY: List[str] = [
     "quirk:5248: limit parsing case 5248 handled or documented",
     "quirk:5249: integer flooring case 5249 handled or documented",
 ]
-
-# A few actual quirk helpers that use the registry.
 
 def quirk_count() -> int:
     return len(QUIRK_REGISTRY)
