@@ -3,19 +3,19 @@ A brute‑force mathematical search engine built to hunt for Perfect Cuboids —
 
 ---
 
-## ▶️ Run It
+### ▶️ Run It
 Run the search engine:
 
 ```
 python cuboid_engine.py
 ```
 
-You can change the search limit on **line 425** of `cuboid_engine.py`  
-(advanced users: see lines **423–471** for full range configuration).
+You can change the search limit on **line 404** of `cuboid_engine.py`  
+(advanced users: see lines **398-439** for full range configuration).
 
 ---
 
-## 📈 Graphs
+### 📈 Graphs
 After running `cuboid_engine.py`, the output will be saved to **log.txt**.
 
 To generate graphs of your Cuboid Engine data:
@@ -28,7 +28,7 @@ This will produce a full analysis dashboard of your run.
 
 ---
 
-## 📦 What This Project Does
+### 📦 What This Project Does
 The Cuboid‑Engine attempts to find integer solutions to the **Perfect Cuboid Problem**, where a rectangular box has:
 
 - all edges as integers  
@@ -44,7 +44,7 @@ Mathematically, it checks:
 
 ---
 
-## 📝 License
+### 📝 License
 This project is licensed under the **GPL‑3.0** license.
 
 That means:
@@ -56,5 +56,8 @@ That means:
 
 ---
 
-## 🙌 Credits
+### 🙌 Credits
 Created by **Byron Kegley (Byron‑Keg)**
+
+
+<sup><sub>(Don't mind the sevral commits, I dont use Github that often)</sub></sup>
