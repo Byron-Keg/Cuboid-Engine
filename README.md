@@ -45,12 +45,6 @@ This will produce a full analysis dashboard of your run.
     <td align="center">
       <img src="README.md%20Assets/10000%20a.png" width="400"><br>
       <sub>(10000 a — Ryzen 7 7730U)</sub>
-    </td>
-    <td align="center">
-      <img src="README.md%20Assets/0.999999e5%20a.png" width="400"><br>
-      <sub>(0.999999e5 a — Ryzen 7 7730U)</sub>
-      <sub>Not done, will commit when done</sub>
-    </td>
   </tr>
 </table>
 
