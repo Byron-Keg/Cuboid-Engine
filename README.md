@@ -28,6 +28,34 @@ This will produce a full analysis dashboard of your run.
 
 ---
 
+### 🧪 Examples (Grid View)
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="README.md%20Assets/1000%20a.png" width="400"><br>
+      <sub>(1000 a — Ryzen 7 7730U)</sub>
+    </td>
+    <td align="center">
+      <img src="README.md%20Assets/5000%20a.png" width="400"><br>
+      <sub>(5000 a — Ryzen 7 7730U)</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="README.md%20Assets/10000%20a.png" width="400"><br>
+      <sub>(10000 a — Ryzen 7 7730U)</sub>
+    </td>
+    <td align="center">
+      <img src="README.md%20Assets/0.999999e5%20a.png" width="400"><br>
+      <sub>(0.999999e5 a — Ryzen 7 7730U)</sub>
+      <sub>Not done, will commit when done</sub>
+    </td>
+  </tr>
+</table>
+
+---
+
 ### 📦 What This Project Does
 The Cuboid‑Engine attempts to find integer solutions to the **Perfect Cuboid Problem**, where a rectangular box has:
 
