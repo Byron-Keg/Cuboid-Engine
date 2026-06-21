@@ -13,11 +13,11 @@ Main features:
 - Euler brick detection.
 - Perfect cuboid detection.
 - Near-miss leaderboard.
-- Checkpoint saving/loading.
 - Progress logging.
+- Plain-text terminal mirroring to log.txt.
 - Optional CSV output.
 
-(NOTE: I did most of my testing of this acript on an iPhone (16e) due to lack of a better device while travling)
+(NOTE: I did most of my testing of this script on an iPhone (16e) due to lack of a better device while travling)
 
 Important:
 The perfect cuboid problem is unsolved. This script does not magically solve it.
@@ -30,15 +30,14 @@ import argparse
 import csv
 import dataclasses
 import heapq
-import json
 import math
-import os
 import sys
 import time
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, List, Optional, Sequence, Set, Tuple
+from typing import Dict, Iterable, Iterator, List, Optional, Sequence, Set, TextIO, Tuple
 
+LOG_FILE = "log.txt"
 
 # =============================================================================
 # Basic data structures
@@ -105,7 +104,6 @@ class SearchStats:
     euler_bricks: int = 0
     perfect_hits: int = 0
     pruned_mod: int = 0
-    checkpoint_saves: int = 0
     last_a: int = 0
 
     def elapsed(self) -> float:
@@ -245,21 +243,6 @@ class NearMissBoard:
 
 
 # =============================================================================
-# Checkpointing
-# =============================================================================
-
-def save_checkpoint(path: Path, stats: SearchStats, board: NearMissBoard) -> None:
-    payload = {
-        "stats": stats.as_dict(),
-        "near_misses": [m.as_row() for m in board.sorted()],
-    }
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    tmp.replace(path)
-    stats.checkpoint_saves += 1
-
-
-# =============================================================================
 # Output helpers
 # =============================================================================
 
@@ -301,9 +284,8 @@ def search(
     keep: int = 25,
     moduli: Sequence[int] = DEFAULT_MODULI,
     progress_every_a: int = 100,
-    checkpoint_path: Optional[Path] = None,
-    checkpoint_every_a: int = 500,
     csv_path: Optional[Path] = None,
+    progress_log: Optional[TextIO] = None,
     stop_after_first: bool = True,
 ) -> Tuple[List[PerfectCuboid], NearMissBoard, SearchStats]:
     limit = parse_positive_limit(limit_raw)
@@ -324,16 +306,17 @@ def search(
     for a in range(1, limit + 1):
         stats.last_a = a
         if progress_every_a and a % progress_every_a == 0:
-            print(
+            progress_line = (
                 f"a={a}/{limit} | "
                 f"elapsed={stats.elapsed():.1f}s | "
                 f"AB hits={stats.face_ab_hits} | "
                 f"Euler bricks={stats.euler_bricks} | "
                 f"pruned_mod={stats.pruned_mod}"
             )
-
-        if checkpoint_path and checkpoint_every_a and a % checkpoint_every_a == 0:
-            save_checkpoint(checkpoint_path, stats, board)
+            print(progress_line)
+            if progress_log is not None:
+                progress_log.write(progress_line + "\n")
+                progress_log.flush()
 
         a2 = a * a
 
@@ -402,8 +385,6 @@ def search(
                     )
                 )
 
-    if checkpoint_path:
-        save_checkpoint(checkpoint_path, stats, board)
     if csv_path:
         write_csv(csv_path, board)
 
@@ -420,7 +401,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--limit",
-        default="5000",
+        default="5000", # Edit to desired limit.
         help="Positive integer or decimal limit. Decimal is floored. Example: 10000 or 3.14159",
     )
     parser.add_argument(
@@ -434,17 +415,6 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=100,
         help="Print progress every N values of a. Use 0 to disable.",
-    )
-    parser.add_argument(
-        "--checkpoint",
-        default="",
-        help="Optional checkpoint JSON path.",
-    )
-    parser.add_argument(
-        "--checkpoint-every-a",
-        type=int,
-        default=500,
-        help="Save checkpoint every N values of a.",
     )
     parser.add_argument(
         "--csv",
@@ -488,49 +458,48 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    if args.quirks:
-        print(f"QUIRK_COUNT={len(QUIRK_REGISTRY)}")
-        print("First 10 quirks:")
-        for q in QUIRK_REGISTRY[:10]:
-            print(q)
-        print("Last 10 quirks:")
-        for q in QUIRK_REGISTRY[-10:]:
-            print(q)
-        return 0
-
-    checkpoint_path = Path(args.checkpoint) if args.checkpoint else None
     csv_path = Path(args.csv) if args.csv else None
     moduli = parse_moduli(args.moduli)
 
-    perfects, board, stats = search(
-        limit_raw=args.limit,
-        keep=args.keep,
-        moduli=moduli,
-        progress_every_a=args.progress_every_a,
-        checkpoint_path=checkpoint_path,
-        checkpoint_every_a=args.checkpoint_every_a,
-        csv_path=csv_path,
-        stop_after_first=not args.continue_after_hit,
-    )
+    log_path = Path(LOG_FILE)
+    with log_path.open("w", encoding="utf-8") as log_file:
+        if args.quirks:
+            print(f"QUIRK_COUNT={len(QUIRK_REGISTRY)}")
+            print("First 10 quirks:")
+            for q in QUIRK_REGISTRY[:10]:
+                print(q)
+            print("Last 10 quirks:")
+            for q in QUIRK_REGISTRY[-10:]:
+                print(q)
+            return 0
 
-    print()
-    print("Search complete.")
-    print(json.dumps(stats.as_dict(), indent=2))
-    if perfects:
+        perfects, board, stats = search(
+            limit_raw=args.limit,
+            keep=args.keep,
+            moduli=moduli,
+            progress_every_a=args.progress_every_a,
+            csv_path=csv_path,
+            progress_log=log_file,
+            stop_after_first=not args.continue_after_hit,
+        )
+
         print()
-        print("Perfect cuboids found:")
-        for hit in perfects:
-            print(hit.as_tuple())
-    else:
-        print()
-        print("No perfect cuboid found in this search.")
+        print("Search complete.")
+        for key, value in stats.as_dict().items():
+            print(f"{key}={value}")
+        if perfects:
+            print()
+            print("Perfect cuboids found:")
+            for hit in perfects:
+                print(hit.as_tuple())
+        else:
+            print()
+            print("No perfect cuboid found in this search.")
 
-    print_near_misses(board)
+        print_near_misses(board)
 
-    if csv_path:
-        print(f"\nCSV written to: {csv_path}")
-    if checkpoint_path:
-        print(f"Checkpoint written to: {checkpoint_path}")
+        if csv_path:
+            print(f"\nCSV written to: {csv_path}")
 
     return 0
 
